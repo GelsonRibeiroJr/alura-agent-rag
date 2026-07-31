@@ -1,0 +1,14 @@
+# Chaves de API e variáveis de ambiente
+.env
+
+# Ambientes virtuais Python
+venv/
+.venv/
+env/
+
+# Arquivos temporários do Python
+__pycache__/
+*.pyc
+
+# Arquivos do Google Colab / Notebooks temporários
+.ipynb_checkpoints/
