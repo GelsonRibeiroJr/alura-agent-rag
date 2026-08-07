@@ -1,27 +1,211 @@
+import base64
 import os
-import sqlite3
 import requests
-import streamlit as st
+import sqlite3
+
 from dotenv import load_dotenv
-from langchain_core.tools import tool
+import streamlit as st
+
 from langchain.agents import create_agent
-from langgraph.checkpoint.sqlite import SqliteSaver
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
+from langchain_core.tools import tool
 from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEmbeddings
+from langgraph.checkpoint.sqlite import SqliteSaver
 
-# --- CONFIGURAÇÃO DA PÁGINA ---
-st.set_page_config(
-    page_title="Assistente Técnico NASA", page_icon="🚀", layout="centered"
+# Configuração da página Streamlit
+st.set_page_config(page_title="Assistente Técnico NASA", page_icon="🚀", layout="wide")
+
+
+def imagem_base64(caminho: str) -> str:
+    """Converte imagem local para string Base64."""
+    with open(caminho, "rb") as arquivo:
+        return base64.b64encode(arquivo.read()).decode("utf-8")
+
+
+# Carregamento do banner em Base64
+banner_base64 = imagem_base64("Imagens/Imagem Nasa Artemis.jpg")
+
+# Estilização CSS customizada
+st.markdown(
+    f"""
+    <style>
+    html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] > .main {{
+        background-color: #0b132b !important;
+        color: #f4f5f7 !important;
+    }}
+
+    .block-container {{
+        max-width: 100% !important;
+        padding-top: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        padding-bottom: 100px !important;
+    }}
+
+    .banner-nasa {{
+        width: 100%;
+        height: 380px;
+        position: relative;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-image: url('data:image/jpeg;base64,{banner_base64}');
+    }}
+
+    .banner-nasa::after {{
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 160px;
+        background: linear-gradient(to bottom, rgba(11, 19, 43, 0), #0b132b);
+    }}
+
+    .cabecalho-nasa {{
+        width: 100%;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }}
+
+    .cabecalho-nasa h1 {{
+        color: #f4f5f7 !important;
+        font-size: 52px !important;
+        font-weight: 700 !important;
+        margin-top: 0 !important;
+        margin-bottom: 8px !important;
+        letter-spacing: -0.5px;
+    }}
+
+    .cabecalho-nasa p {{
+        color: #aab4c8 !important;
+        font-size: 20px !important;
+        margin: 0 !important;
+    }}
+
+    .logo-nasa-container img {{
+        width: 120px !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }}
+
+    .divisoria-nasa {{
+        width: 89.6%;
+        height: 1px;
+        margin: 15px auto 30px auto;
+        background-color: #1c2947;
+    }}
+
+    [data-testid="stChatMessage"] {{
+        margin-left: 5.2% !important;
+        margin-right: 5.2% !important;
+        background-color: #111d38 !important;
+        border: 1px solid #263858 !important;
+        border-radius: 12px !important;
+    }}
+
+    [data-testid="stBottomBlockContainer"] {{
+        background-color: #0b132b !important;
+        border-top: 1px solid #172542 !important;
+        padding-top: 10px !important;
+    }}
+
+    [data-testid="stBottomBlockContainer"] > div {{
+        background-color: #0b132b !important;
+    }}
+
+    [data-testid="stChatInput"] {{
+        background-color: #17233d !important;
+        border: 1px solid #31466b !important;
+        border-radius: 14px !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.30) !important;
+    }}
+
+    [data-testid="stChatInput"] > div {{
+        background-color: #17233d !important;
+        border: none !important;
+        border-radius: 14px !important;
+    }}
+
+    [data-testid="stChatInput"] textarea {{
+        background-color: #17233d !important;
+        color: #ffffff !important;
+        border: none !important;
+        font-size: 16px !important;
+    }}
+
+    [data-testid="stChatInput"] textarea::placeholder {{
+        color: #8d9ab2 !important;
+        opacity: 1 !important;
+    }}
+
+    [data-testid="stChatInput"] button {{
+        background-color: #263858 !important;
+        color: #ffffff !important;
+        border-radius: 10px !important;
+    }}
+
+    header[data-testid="stHeader"], footer {{
+        background-color: #0b132b !important;
+    }}
+
+    ::-webkit-scrollbar {{
+        width: 8px;
+    }}
+
+    ::-webkit-scrollbar-track {{
+        background: #0b132b;
+    }}
+
+    ::-webkit-scrollbar-thumb {{
+        background: #263858;
+        border-radius: 10px;
+    }}
+
+    @media (max-width: 768px) {{
+        .banner-nasa {{ height: 250px; }}
+        .cabecalho-nasa h1 {{ font-size: 32px !important; }}
+        .cabecalho-nasa p {{ font-size: 16px !important; }}
+        .logo-nasa-container img {{ width: 90px !important; }}
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
-st.title("🚀 Assistente Técnico da NASA")
-st.caption(
-    "Agente RAG especialista em exploração lunar e Programa Artemis com memória e citações de fontes."
-)
+# Renderização do Banner
+st.markdown('<div class="banner-nasa"></div>', unsafe_allow_html=True)
 
+# Cabeçalho com proporção refinada [1, 4.2, 0.8]
+col_esq, col_titulo, col_logo = st.columns([1, 4.2, 0.8], gap="medium")
 
-# --- CARREGAMENTO DO BANCO VETORIAL & LLM ---
+with col_esq:
+    st.write("")
+
+with col_titulo:
+    st.markdown(
+        """
+        <div class="cabecalho-nasa">
+            <h1>Assistente Técnico NASA</h1>
+            <p>Agente especialista em exploração lunar e Programa Artemis.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+with col_logo:
+    st.markdown(
+        '<div class="logo-nasa-container" style="display: flex; justify-content: flex-end; align-items: center; height: 100%;">',
+        unsafe_allow_html=True,
+    )
+    st.image("Imagens/nasa-seeklogo.png", width=120)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+st.markdown('<div class="divisoria-nasa"></div>', unsafe_allow_html=True)
+
+# Carregamento do banco de dados vetorial e LLM
 load_dotenv(override=True)
 
 
@@ -30,14 +214,11 @@ def carregar_recursos():
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
-
     vectorstore = FAISS.load_local(
         "faiss_index", embeddings, allow_dangerous_deserialization=True
     )
-
     api_key = os.getenv("GROQ_API_KEY")
-
-    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2, api_key=api_key)
+    llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.2, api_key=api_key)
     return vectorstore, llm
 
 
@@ -48,14 +229,14 @@ except Exception as e:
     st.stop()
 
 
-# --- DEFINIÇÃO DAS FERRAMENTAS ---
+# Ferramenta RAG para os PDFs do Programa Artemis
 @tool
 def pega_contexto_artemis_lunar(query: str) -> str:
-    """Busca contexto técnico sobre o Programa Artemis, naves, rotas e missões na Lua nos PDFs oficiais da NASA."""
+    """Busca contexto técnico sobre o Programa Artemis, naves e missões na Lua nos PDFs da NASA."""
     retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
     resultado = retriever.invoke(query)
-
     texto_formatado = []
+
     for doc in resultado:
         fonte = doc.metadata.get("source", "NASA").split("/")[-1]
         pagina = doc.metadata.get("page", 0) + 1
@@ -66,12 +247,15 @@ def pega_contexto_artemis_lunar(query: str) -> str:
     return "\n\n---\n\n".join(texto_formatado)
 
 
+# Ferramenta para consulta de imagens e projetos na API pública da NASA
 @tool
 def consulta_api_nasa(query: str) -> str:
-    """Consulta a API da NASA para dúvidas sobre projetos gerais, telescópios ou espaço que não estão nos PDFs."""
+    """Consulta a API de imagens da NASA para dúvidas gerais não contidas nos PDFs."""
     try:
-        url = f"https://images-api.nasa.gov/search?q={query}&media_type=image"
-        response = requests.get(url, timeout=5)
+        url = "https://images-api.nasa.gov/search"
+        response = requests.get(
+            url, params={"q": query, "media_type": "image"}, timeout=5
+        )
         if response.status_code == 200:
             items = response.json().get("collection", {}).get("items", [])
             if items:
@@ -84,8 +268,9 @@ def consulta_api_nasa(query: str) -> str:
 
 tools = [pega_contexto_artemis_lunar, consulta_api_nasa]
 
-# --- PROMPT DO AGENTE ---
-system_prompt = """Você é um assistente técnico especialista da NASA.
+# Prompt do Sistema
+system_prompt = """
+Você é um assistente técnico especialista da NASA.
 Responda à pergunta do usuário de forma DIRETA, OBJETIVA e em Português do Brasil.
 Não faça justificativas, introduções ou explicações sobre a busca.
 
@@ -105,22 +290,24 @@ Se o usuário fizer perguntas que NÃO tenham relação com espaço, astronomia 
 "Sou um agente especialista em responder perguntas sobre a exploração lunar e sobre a NASA. Sua pergunta está fora do meu escopo de conhecimento."
 """
 
-# --- INICIALIZAÇÃO DO AGENTE COM SQLITE ---
+# Configuração de memória local via SQLite
 conn = sqlite3.connect("memoria_agente.db", check_same_thread=False)
 memoria = SqliteSaver(conn)
 memoria.setup()
 
+# Criação do agente com LangGraph
 agente_nasa = create_agent(
     model=llm, tools=tools, system_prompt=system_prompt, checkpointer=memoria
 )
 
-# --- INTERFACE STREAMLIT ---
+# Inicialização e renderização do histórico no Streamlit
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
 
 for msg in st.session_state["messages"]:
     st.chat_message(msg["role"]).write(msg["content"])
 
+# Execução do chat
 if prompt := st.chat_input("Pergunte sobre as missões Artemis ou a NASA..."):
     st.session_state["messages"].append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
