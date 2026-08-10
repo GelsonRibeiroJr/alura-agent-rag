@@ -13,6 +13,9 @@ from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langgraph.checkpoint.sqlite import SqliteSaver
 
+# Mapeamento do diretório base do script
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Configuração da página Streamlit
 st.set_page_config(page_title="Assistente Técnico NASA", page_icon="🚀", layout="wide")
 
@@ -23,8 +26,9 @@ def imagem_base64(caminho: str) -> str:
         return base64.b64encode(arquivo.read()).decode("utf-8")
 
 
-# Carregamento do banner em Base64
-banner_base64 = imagem_base64("Imagens/Imagem Nasa Artemis.jpg")
+# Carregamento do banner em Base64 usando caminho dinâmico
+caminho_banner = os.path.join(BASE_DIR, "Imagens", "Imagem Nasa Artemis.jpg")
+banner_base64 = imagem_base64(caminho_banner)
 
 # Estilização CSS customizada
 st.markdown(
@@ -32,7 +36,7 @@ st.markdown(
     <style>
     html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] > .main {{
         background-color: #0b132b !important;
-        color: #f4f5f7 !important;
+        color: #ffffff !important;
     }}
 
     .block-container {{
@@ -71,7 +75,7 @@ st.markdown(
     }}
 
     .cabecalho-nasa h1 {{
-        color: #f4f5f7 !important;
+        color: #ffffff !important;
         font-size: 52px !important;
         font-weight: 700 !important;
         margin-top: 0 !important;
@@ -98,12 +102,17 @@ st.markdown(
         background-color: #1c2947;
     }}
 
+    /* Estilização das mensagens do chat com texto em branco */
     [data-testid="stChatMessage"] {{
         margin-left: 5.2% !important;
         margin-right: 5.2% !important;
         background-color: #111d38 !important;
         border: 1px solid #263858 !important;
         border-radius: 12px !important;
+    }}
+
+    [data-testid="stChatMessage"] * {{
+        color: #ffffff !important;
     }}
 
     [data-testid="stBottomBlockContainer"] {{
@@ -200,13 +209,15 @@ with col_logo:
         '<div class="logo-nasa-container" style="display: flex; justify-content: flex-end; align-items: center; height: 100%;">',
         unsafe_allow_html=True,
     )
-    st.image("Imagens/nasa-seeklogo.png", width=120)
+    caminho_logo = os.path.join(BASE_DIR, "Imagens", "nasa-seeklogo.png")
+    st.image(caminho_logo, width=120)
     st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown('<div class="divisoria-nasa"></div>', unsafe_allow_html=True)
 
-# Carregamento do banco de dados vetorial e LLM
-load_dotenv(override=True)
+# Carregamento do .env
+caminho_env = os.path.join(BASE_DIR, ".env")
+load_dotenv(caminho_env, override=True)
 
 
 @st.cache_resource
@@ -214,11 +225,13 @@ def carregar_recursos():
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
     )
+    caminho_faiss = os.path.join(BASE_DIR, "faiss_index")
     vectorstore = FAISS.load_local(
-        "faiss_index", embeddings, allow_dangerous_deserialization=True
+        caminho_faiss, embeddings, allow_dangerous_deserialization=True
     )
     api_key = os.getenv("GROQ_API_KEY")
-    llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.2, api_key=api_key)
+
+    llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.2, api_key=api_key)
     return vectorstore, llm
 
 
@@ -229,19 +242,20 @@ except Exception as e:
     st.stop()
 
 
-# Ferramenta RAG para os PDFs do Programa Artemis
+# Ferramenta RAG otimizada para consumir menos tokens
 @tool
 def pega_contexto_artemis_lunar(query: str) -> str:
     """Busca contexto técnico sobre o Programa Artemis, naves e missões na Lua nos PDFs da NASA."""
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 1})
     resultado = retriever.invoke(query)
     texto_formatado = []
 
     for doc in resultado:
         fonte = doc.metadata.get("source", "NASA").split("/")[-1]
         pagina = doc.metadata.get("page", 0) + 1
+        conteudo_limitado = doc.page_content[:1500]
         texto_formatado.append(
-            f"[Documento: '{fonte}', Página {pagina}]\n{doc.page_content}"
+            f"[Documento: '{fonte}', Página {pagina}]\n{conteudo_limitado}"
         )
 
     return "\n\n---\n\n".join(texto_formatado)
@@ -260,7 +274,7 @@ def consulta_api_nasa(query: str) -> str:
             items = response.json().get("collection", {}).get("items", [])
             if items:
                 desc = items[0]["data"][0].get("description", "")
-                return f"[Fonte: API da NASA]\n{desc[:500]}"
+                return f"[Fonte: API da NASA]\n{desc[:300]}"
     except Exception:
         pass
     return "Nenhum dado retornado da API da NASA."
@@ -291,7 +305,8 @@ Se o usuário fizer perguntas que NÃO tenham relação com espaço, astronomia 
 """
 
 # Configuração de memória local via SQLite
-conn = sqlite3.connect("memoria_agente.db", check_same_thread=False)
+caminho_db = os.path.join(BASE_DIR, "memoria_agente.db")
+conn = sqlite3.connect(caminho_db, check_same_thread=False)
 memoria = SqliteSaver(conn)
 memoria.setup()
 

@@ -1,0 +1,8 @@
+.env
+.git
+.gitignore
+__pycache__/
+*.pyc
+memoria_agente.db
+venv/
+.venv/
