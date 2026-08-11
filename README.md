@@ -17,6 +17,8 @@ alura-agent-rag/
 │   ├── memoria_agente.db     # Banco de dados SQLite de memória das sessões
 │   └── requirements.txt      # Dependências Python da aplicação
 ├── data/                     # Documentos técnicos em PDF (Biblioteca da NASA)
+├── Evidências/               # Capturas de tela, Metrics OCI
+
 ├── infra/                    # Automação de infraestrutura como código (IaC)
 │   └── main.tf               # Provisionamento Terraform da OCI (VCN, Subnet e VM)
 ├── .dockerignore             # Arquivos excluídos do contexto do Docker
@@ -115,7 +117,7 @@ A aplicação está containerizada via Docker e implantada em uma instância Com
 
 1. **Clonar o repositório:**
 ```bash
-git clone [https://github.com/GelsonRibeiroJr/alura-agent-rag.git](https://github.com/GelsonRibeiroJr/alura-agent-rag.git)
+git clone https://github.com/GelsonRibeiroJr/alura-agent-rag.git(https://github.com/GelsonRibeiroJr/alura-agent-rag.git)
 cd alura-agent-rag
 
 ```
@@ -166,3 +168,18 @@ streamlit run Artigo_Streamlit/app.py
 * **Pergunta:** *"Quem venceu a última Champions League?"*
 * **Resposta do Agente:** *"Sou um agente especialista em responder perguntas sobre a exploração lunar e sobre a NASA. Sua pergunta está fora do meu escopo de conhecimento."*
 
+## 📊 Relatório de Execução e Observabilidade em Nuvem
+
+A validação do sistema foi realizada diretamente no ambiente de produção na **Oracle Cloud Infrastructure (OCI)** no endereço público `http://147.15.19.95:8501`.
+
+---
+
+### 🎥 Demonstração em Vídeo
+
+* 🎥 [Clique aqui para assistir à demonstração em vídeo do Agente rodando na OCI](https://youtu.be/rrwmGt5lxmc)
+
+---
+
+### 📷 Evidências do Agente em Produção e Métricas OCI
+
+* 📂 **[Clique aqui para acessar a pasta de Evidências com todas as capturas e logs](./Evidências/)**
