@@ -14,7 +14,6 @@ alura-agent-rag/
 │   ├── .env                  # Variáveis de ambiente locais (chaves de API)
 │   ├── .gitignore            # Arquivos ignorados pelo Git no subdiretório
 │   ├── app.py                # Interface Streamlit e lógica do agente
-│   ├── memoria_agente.db     # Banco de dados SQLite de memória das sessões
 │   └── requirements.txt      # Dependências Python da aplicação
 ├── data/                     # Documentos técnicos em PDF (Biblioteca da NASA)
 ├── Evidências/               # Capturas de tela, Metrics OCI
@@ -25,7 +24,7 @@ alura-agent-rag/
 ├── .gitignore                # Arquivos ignorados pelo Git na raiz
 ├── 1º_RAG.ipynb              # Notebook de prototipagem e testes do RAG
 ├── Dockerfile                # Receita de containerização da aplicação
-├── memoria_agente.db         # Histórico de persistência local do agente
+├── memoria_agente.db         # Banco de dados SQLite de memória das sessões
 └── README.md                 # Documentação oficial do projeto
 
 ```
