@@ -1,4 +1,4 @@
-# 🚀 Alura Agente RAG - Especialista em Exploração Lunar & NASA
+# 🚀 Challenge Alura - Agente RAG - Especialista em Exploração Lunar & NASA
 
 Solução de Inteligência Artificial Generativa desenvolvida durante o **Challenge Oracle Next Education (ONE) & Alura**. O agente atua como um assistente técnico especialista no programa de exploração lunar da NASA (como o Programa Artemis), combinando a busca em documentos locais (**RAG com FAISS**) com consultas em tempo real à **API Oficial da NASA**, além de contar com um sistema de **guard-rails** e **citação obrigatória de fontes**.
 
@@ -32,14 +32,14 @@ alura-agent-rag/
 
 ---
 
-## 🌟 Diferenciais e Funcionalidades Core (Os "Plus" do Projeto)
+## 🌟 Funcionalidades
 
 ### 1. Busca Híbrida de Conhecimento (RAG + API Externa)
 
 * **Ferramenta `pega_contexto_artemis_lunar`:** Realiza busca vetorial (FAISS) nos documentos em PDF armazenados no diretório `data/` sobre o Programa Artemis e exploração lunar.
 * **Ferramenta `consulta_api_nasa`:** Atua como um *complemento em tempo real*, permitindo consultar dados dinâmicos da API da NASA para expandir a cobertura do agente.
 
-### 2. Guard-Rail Rígido de Escopo
+### 2. Guard-Rail de Escopo
 
 O agente conta com uma camada de segurança lógica configurada via prompt. Se o usuário fizer perguntas fora do domínio de astronomia, espaço ou NASA (como esportes, culinária ou política), as ferramentas de busca **não são acionadas** e o agente retorna uma recusa padronizada:
 
@@ -110,8 +110,8 @@ A aplicação está containerizada via Docker e implantada em uma instância Com
 ### Pré-requisitos
 
 * Python 3.10 ou superior
-* Chave de API da Groq (`GROQ_API_KEY`)
-* Chave da API da NASA (`NASA_API_KEY`)
+* Chave de API da Groq (`GROQ_API_KEY`) - Link de acesso para criação da API:  https://console.groq.com/keys
+* Chave da API da NASA (`NASA_API_KEY`) - Link de acesso para criação da API: https://api.nasa.gov/
 
 ### Passo a Passo
 
@@ -183,3 +183,32 @@ A validação do sistema foi realizada diretamente no ambiente de produção na 
 ### 📷 Evidências do Agente em Produção e Métricas OCI
 
 * 📂 **[Clique aqui para acessar a pasta de Evidências com todas as capturas e logs](./Evidências/)**
+
+---
+
+#### 1. Interface do Agente, RAG e Citações
+<p align="center">
+  <img src="Evidências/Captura_1.jpg" alt="Tela Inicial do Agente" width="800"><br><br>
+  <img src="Evidências/Captura%202.jpg" alt="Validação do RAG, API e Guard-Rail" width="800"><br><br>
+  <img src="Evidências/Captura%20Fonte%201.jpg" alt="Detalhamento das Fontes RAG" width="800"><br><br>
+  <img src="Evidências/Captura%20Fonte%202.jpg" alt="Detalhamento das Fontes API" width="800">
+</p>
+
+---
+
+#### 2. Execução do Container Docker na VM OCI
+<p align="center">
+  <img src="Evidências/Captura%20Docker%20OCI%208501.jpg" alt="Porta e Serviço Docker Ativos" width="800"><br><br>
+  <img src="Evidências/Captura%20Conteiner%20OCI.jpg" alt="Status do Container em Execução" width="800"><br><br>
+  <img src="Evidências/Imagem%20VM%20Logs.jpg" alt="Logs de Inicialização da VM" width="800"><br><br>
+  <img src="Evidências/Imagem%20VM%20Logs%202.jpg" alt="Logs de Execução do Sistema" width="800">
+</p>
+
+---
+
+#### 3. Monitoramento de Recursos e Métricas OCI
+<p align="center">
+  <img src="Evidências/Captura%20Metricas%20OCI.jpg" alt="Visão Geral das Métricas OCI" width="800"><br><br>
+  <img src="Evidências/Captura%20Metricas%20OCI%202.jpg" alt="Gráficos de Consumo de Recursos 2" width="800"><br><br>
+  <img src="Evidências/Captura%20Metricas%20OCI%203.jpg" alt="Gráficos de Consumo de Recursos 3" width="800">
+</p>
